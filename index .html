@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANIS — THE HACKER KING</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  min-height:100vh; background:#000; color:#fff;
+  font-family:'Space Grotesk',sans-serif;
+  overflow-x:hidden; cursor:none;
+}
+#custom-cursor {
+  width:12px; height:12px; background:#fff; border-radius:50%;
+  position:fixed; pointer-events:none; z-index:9999;
+  transition:transform 0.15s ease; mix-blend-mode:difference;
+}
+#cursor-ring {
+  width:36px; height:36px; border:1px solid rgba(255,255,255,0.4);
+  border-radius:50%; position:fixed; pointer-events:none; z-index:9998;
+}
+#bg-video {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  object-fit:cover; opacity:0.25; z-index:0;
+  filter:grayscale(1) contrast(1.2);
+}
+#bg-overlay {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.85) 100%);
+  z-index:1;
+}
+.scanlines {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  z-index:3; pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
+}
+.top-nav {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  padding:20px 40px;
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  letter-spacing:0.4em; font-size:11px; color:rgba(255,255,255,0.35);
+  font-weight:300; text-transform:uppercase;
+}
+.top-nav span { color:rgba(255,255,255,0.5); }
+
+/* ── hero canvas block ── */
+#hero-block {
+  position:relative;
+  z-index:10;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  pointer-events:none;
+  width:100%;
+}
+#blood-canvas {
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  pointer-events:none;
+  z-index:12;
+}
+.glitch-subtitle {
+  font-size:12px; letter-spacing:0.5em; text-transform:uppercase;
+  color:rgba(255,255,255,0.45); font-weight:300; margin-bottom:20px;
+  animation:flicker 4s infinite; position:relative; z-index:11;
+}
+@keyframes flicker {
+  0%,95%,100%{opacity:1} 96%{opacity:0.4} 97%{opacity:1} 98%{opacity:0.2} 99%{opacity:1}
+}
+.hacked-text {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(14px,2.5vw,20px);
+  font-weight:700; letter-spacing:0.3em; text-transform:uppercase;
+  color:#c80000;
+  text-shadow:0 0 20px rgba(200,0,0,0.8), 0 0 50px rgba(150,0,0,0.4);
+  margin-bottom:0px;
+  position:relative; z-index:11;
+  animation:bloodPulse 2.5s ease-in-out infinite;
+}
+@keyframes bloodPulse {
+  0%,100%{ color:#c80000; text-shadow:0 0 20px rgba(200,0,0,0.8),0 0 50px rgba(150,0,0,0.4); }
+  50%    { color:#ff1111; text-shadow:0 0 35px rgba(255,0,0,1),  0 0 70px rgba(200,0,0,0.7); }
+}
+.main-title {
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(70px,14vw,140px);
+  font-weight:900;
+  color:#c80000;
+  text-shadow:0 0 30px rgba(200,0,0,0.7), 0 0 80px rgba(120,0,0,0.4);
+  line-height:0.9; margin-bottom:0;
+  position:relative; z-index:11;
+  animation:titleBlood 2.5s ease-in-out infinite;
+}
+@keyframes titleBlood {
+  0%,100%{ color:#c80000; text-shadow:0 0 30px rgba(200,0,0,0.7),0 0 80px rgba(120,0,0,0.4); }
+  50%    { color:#ff1111; text-shadow:0 0 50px rgba(255,0,0,1),  0 0 100px rgba(200,0,0,0.7); }
+}
+.king-text {
+  font-size:11px; letter-spacing:0.6em; text-transform:uppercase;
+  color:rgba(255,255,255,0.3); font-weight:300;
+  margin-top:14px; position:relative; z-index:11;
+}
+main {
+  position:relative; z-index:10;
+  min-height:100vh;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:40px 20px 140px; text-align:center;
+}
+.divider { width:1px; height:40px; background:rgba(255,255,255,0.15); margin:20px auto; }
+.btn-group {
+  display:flex; gap:16px; margin-top:32px; flex-wrap:wrap; justify-content:center;
+}
+.btn {
+  display:inline-flex; align-items:center; gap:8px; padding:12px 28px;
+  border-radius:100px; font-size:11px; font-weight:500; letter-spacing:0.25em;
+  text-transform:uppercase; text-decoration:none; cursor:pointer; border:none;
+  transition:all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+  font-family:'Space Grotesk',sans-serif;
+}
+.btn-red { background:rgba(200,30,30,0.15); border:1px solid rgba(220,50,50,0.35); color:rgba(255,120,120,0.9); }
+.btn-red:hover { background:rgba(200,30,30,0.28); border-color:rgba(255,80,80,0.6); color:#ff8888; transform:scale(1.04); }
+.btn-outline { background:transparent; border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.7); }
+.btn-outline:hover { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.5); color:#fff; transform:scale(1.03); }
+.btn-green { background:rgba(30,180,80,0.12); border:1px solid rgba(50,200,100,0.3); color:rgba(80,220,130,0.9); }
+.btn-green:hover { background:rgba(30,180,80,0.22); border-color:rgba(80,220,130,0.6); color:#60f0a0; transform:scale(1.04); }
+
+/* player */
+#player-bar {
+  position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+  width:min(520px,88vw); z-index:200;
+  backdrop-filter:blur(32px) saturate(180%) brightness(0.6);
+  -webkit-backdrop-filter:blur(32px) saturate(180%) brightness(0.6);
+  background:rgba(0,0,0,0.18);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  padding:10px 14px;
+  display:flex; align-items:center; gap:12px;
+  box-shadow:0 4px 30px rgba(0,0,0,0.5);
+  pointer-events:none;
+}
+/* note icon */
+.p-note {
+  width:34px; height:34px; flex-shrink:0;
+  background:rgba(255,255,255,0.07);
+  border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  color:rgba(255,255,255,0.55);
+  border:1px solid rgba(255,255,255,0.1);
+}
+/* song name + artist */
+.p-info { flex-shrink:0; }
+.p-title {
+  font-size:12px; font-weight:600; color:#fff;
+  white-space:nowrap; letter-spacing:0.01em;
+}
+.p-sub {
+  font-size:10px; color:rgba(255,255,255,0.38);
+  font-weight:300; letter-spacing:0.05em; margin-top:1px;
+}
+/* time + bar */
+.p-middle {
+  flex:1; display:flex; align-items:center; gap:7px; min-width:0;
+}
+.p-time {
+  font-size:10px; color:rgba(255,255,255,0.4); font-weight:300;
+  min-width:28px; font-variant-numeric:tabular-nums;
+}
+.p-track {
+  flex:1; height:3px; background:rgba(255,255,255,0.15);
+  border-radius:3px; position:relative; overflow:hidden;
+}
+.p-fill {
+  height:100%; width:0%;
+  background:linear-gradient(90deg,rgba(255,255,255,0.5),rgba(255,255,255,0.85));
+  border-radius:3px; transition:width 0.5s linear;
+  position:relative;
+}
+.p-fill::after {
+  content:''; position:absolute; right:-1px; top:50%;
+  transform:translateY(-50%);
+  width:7px; height:7px; background:#fff;
+  border-radius:50%;
+  box-shadow:0 0 4px rgba(255,255,255,0.6);
+}
+/* waveform */
+.p-wave { display:flex; align-items:center; gap:2px; height:22px; flex-shrink:0; }
+.wb { width:2px; background:rgba(255,255,255,0.45); border-radius:2px; animation:wbPulse 0.7s ease-in-out infinite alternate; }
+.wb:nth-child(1){height:5px; animation-delay:0s}
+.wb:nth-child(2){height:13px;animation-delay:.12s}
+.wb:nth-child(3){height:18px;animation-delay:.06s}
+.wb:nth-child(4){height:9px; animation-delay:.18s}
+.wb:nth-child(5){height:14px;animation-delay:.03s}
+@keyframes wbPulse{from{transform:scaleY(0.25);opacity:0.35}to{transform:scaleY(1);opacity:0.9}}
+.bottom-footer {
+  position:fixed; bottom:104px; left:50%; transform:translateX(-50%);
+  font-size:10px; letter-spacing:0.3em; color:rgba(255,255,255,0.12);
+  z-index:10; text-transform:uppercase; white-space:nowrap;
+}
+</style>
+</head>
+<body>
+
+<div id="custom-cursor"></div>
+<div id="cursor-ring"></div>
+<div id="bg-overlay"></div>
+<div class="scanlines"></div>
+
+<video id="bg-video" autoplay muted loop playsinline>
+  <source src="0601.mp4" type="video/mp4">
+</video>
+
+<nav class="top-nav">
+  <span>◆</span> S &nbsp; O &nbsp; S <span>◆</span>
+</nav>
+
+<main>
+  <p class="glitch-subtitle">— 2025 —</p>
+
+  <!-- hero block: texts + canvas overlay -->
+  <div id="hero-block">
+    <canvas id="blood-canvas"></canvas>
+    <p class="hacked-text" id="hacked-line">This server has been hacked by</p>
+    <h1 class="main-title" id="anis-line">ANIS</h1>
+    <p class="king-text">T H E &nbsp;&nbsp; H A C K E R &nbsp;&nbsp; K I N G</p>
+  </div>
+
+  <div class="divider"></div>
+  <div class="btn-group">
+    <a class="btn btn-red" href="#">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+      ANIS F***K U SERVER
+    </a>
+    <a class="btn btn-outline" href="#">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 12a4 4 0 108 0 4 4 0 00-8 0M2 12a10 10 0 1020 0A10 10 0 002 12"/></svg>
+      DISCORD.GG / ANIS
+    </a>
+    <a class="btn btn-green" href="#">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      N9ASS ROJLA
+    </a>
+  </div>
+</main>
+
+<div class="bottom-footer">ANIS · 2025</div>
+
+<div id="player-bar">
+  <div class="p-note">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 19c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm11-2c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zM9 17V7l10-2v10"/></svg>
+  </div>
+  <div class="p-info">
+    <div class="p-title">MoonDeity - NEON BLADE</div>
+    <div class="p-sub">ANIS · SOS</div>
+  </div>
+  <div class="p-middle">
+    <span class="p-time" id="cur-time">0:10</span>
+    <div class="p-track"><div class="p-fill" id="progress-fill"></div></div>
+    <span class="p-time" id="dur-time">--:--</span>
+  </div>
+  <div class="p-wave">
+    <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+    <div class="wb"></div><div class="wb"></div>
+  </div>
+</div>
+
+<audio id="audio-player" src="MoonDeity_-_NEON_BLADE.mp3" preload="auto" loop></audio>
+
+<script>
+/* ════════════════════════════════════════
+   REALISTIC BLOOD DRIP ENGINE — Canvas
+   ════════════════════════════════════════ */
+const canvas = document.getElementById('blood-canvas');
+const ctx    = canvas.getContext('2d');
+const hero   = document.getElementById('hero-block');
+
+/* resize canvas to match hero block */
+function resizeCanvas() {
+  const r = hero.getBoundingClientRect();
+  canvas.width  = r.width;
+  canvas.height = r.height + 120; /* extra room for drips */
+  hero.style.paddingBottom = '120px';
+}
+resizeCanvas();
+window.addEventListener('resize', () => { resizeCanvas(); drops.length=0; initDrops(); });
+
+/* ── drip data structures ── */
+class BloodDrop {
+  constructor(x, startY, zone) {
+    this.x      = x;
+    this.startY = startY;
+    this.y      = startY;
+    this.zone   = zone; /* 'top' or 'anis' */
+    /* stem */
+    this.stemW  = 2 + Math.random() * 4;   /* 2–6 px wide */
+    this.speed  = 0.4 + Math.random() * 1.1;
+    /* bulge at bottom */
+    this.bulge  = 0;                        /* grows as it falls */
+    this.maxBulge = this.stemW * (2.5 + Math.random() * 2); /* 5–14px */
+    /* drip trail: array of {y, r} */
+    this.trail  = [];
+    /* state */
+    this.phase  = 'grow';   /* grow → fall → drop → splash → dead */
+    this.splashR= 0;
+    this.opacity= 0.92 + Math.random()*0.08;
+    /* pooling at source */
+    this.poolLen = 0;
+    this.poolMax = 6 + Math.random() * 12;
+    this.delay   = Math.random() * 180; /* frames delay before start */
+    this.active  = false;
+  }
+
+  tick() {
+    if (this.delay > 0) { this.delay--; return; }
+    this.active = true;
+
+    if (this.phase === 'grow') {
+      /* pool grows at source */
+      this.poolLen += 0.3 + Math.random() * 0.2;
+      if (this.poolLen >= this.poolMax) {
+        this.phase = 'fall';
+      }
+    } else if (this.phase === 'fall') {
+      /* bulge grows while moving */
+      this.bulge = Math.min(this.bulge + 0.12, this.maxBulge);
+      this.y    += this.speed;
+      this.trail.push({ y: this.y, r: this.stemW / 2 });
+      /* limit trail length */
+      if (this.trail.length > 400) this.trail.shift();
+
+      /* drop detaches when bulge is big enough */
+      if (this.bulge >= this.maxBulge * 0.95) {
+        this.phase    = 'drop';
+        this.dropY    = this.y;
+        this.dropR    = this.maxBulge / 2;
+        this.dropSpeed= this.speed * 1.6;
+      }
+    } else if (this.phase === 'drop') {
+      this.dropY     += this.dropSpeed;
+      this.dropSpeed += 0.08; /* gravity */
+      /* check out of canvas */
+      if (this.dropY > canvas.height + 20) {
+        this.phase = 'dead';
+      }
+    } else if (this.phase === 'splash') {
+      this.splashR += 1.2;
+      this.opacity -= 0.05;
+      if (this.opacity <= 0) this.phase = 'dead';
+    }
+  }
+
+  draw() {
+    if (!this.active) return;
+    const r  = 'rgba(150,0,0,';
+    const r2 = 'rgba(100,0,0,';
+
+    /* trail stem */
+    if (this.trail.length > 1) {
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.startY);
+      for (let i = 0; i < this.trail.length; i++) {
+        ctx.lineTo(this.x, this.trail[i].y);
+      }
+      ctx.strokeStyle = r + this.opacity + ')';
+      ctx.lineWidth   = this.stemW;
+      ctx.lineCap     = 'round';
+      ctx.stroke();
+    }
+
+    /* bulge tear-drop at tip */
+    if (this.phase === 'fall' && this.bulge > 0) {
+      drawTearDrop(ctx, this.x, this.y, this.bulge, this.stemW, this.opacity);
+    }
+
+    /* detached falling drop */
+    if (this.phase === 'drop') {
+      /* elongate drop as it accelerates */
+      const stretch = 1 + this.dropSpeed * 0.15;
+      ctx.save();
+      ctx.translate(this.x, this.dropY);
+      ctx.scale(1, stretch);
+      ctx.beginPath();
+      ctx.arc(0, 0, this.dropR, 0, Math.PI * 2);
+      const g = ctx.createRadialGradient(-this.dropR*0.3,-this.dropR*0.3,0,0,0,this.dropR);
+      g.addColorStop(0, 'rgba(220,20,20,0.95)');
+      g.addColorStop(0.5,'rgba(160,0,0,0.92)');
+      g.addColorStop(1,  'rgba(80,0,0,0.85)');
+      ctx.fillStyle = g;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    /* source pool */
+    if (this.poolLen > 0 && this.phase !== 'dead') {
+      ctx.beginPath();
+      ctx.ellipse(this.x, this.startY, this.stemW / 2 + 1, this.poolLen / 3, 0, 0, Math.PI * 2);
+      ctx.fillStyle = r + this.opacity + ')';
+      ctx.fill();
+    }
+  }
+}
+
+function drawTearDrop(ctx, x, y, bulge, stemW, opacity) {
+  const rx = bulge / 2, ry = bulge * 0.7;
+  ctx.beginPath();
+  /* top half flat, bottom half round */
+  ctx.moveTo(x - stemW / 2, y);
+  ctx.bezierCurveTo(x - rx, y, x - rx, y + ry, x, y + ry);
+  ctx.bezierCurveTo(x + rx, y + ry, x + rx, y, x + stemW / 2, y);
+  ctx.closePath();
+  const g = ctx.createRadialGradient(x - rx*0.2, y + ry*0.2, 0, x, y + ry*0.4, rx);
+  g.addColorStop(0,   'rgba(220,20,20,'  + opacity + ')');
+  g.addColorStop(0.5, 'rgba(160,0,0,'   + opacity + ')');
+  g.addColorStop(1,   'rgba(80,0,0,'    + opacity + ')');
+  ctx.fillStyle = g;
+  ctx.fill();
+}
+
+/* ── spawn points derived from text element positions ── */
+let drops = [];
+
+function getSpawnPoints() {
+  const heroRect = hero.getBoundingClientRect();
+  const hacked   = document.getElementById('hacked-line');
+  const anis     = document.getElementById('anis-line');
+  const points   = [];
+
+  function addPointsFrom(el, zone, count) {
+    const r = el.getBoundingClientRect();
+    const left  = r.left - heroRect.left;
+    const right = r.right - heroRect.left;
+    const y     = r.bottom - heroRect.top;
+    for (let i = 0; i < count; i++) {
+      const x = left + (right - left) * (0.04 + Math.random() * 0.92);
+      points.push({ x, y, zone });
+    }
+  }
+
+  addPointsFrom(hacked, 'top',  14);
+  addPointsFrom(anis,   'anis', 18);
+  return points;
+}
+
+function initDrops() {
+  drops = [];
+  /* wait for fonts */
+  setTimeout(() => {
+    const pts = getSpawnPoints();
+    pts.forEach(p => {
+      drops.push(new BloodDrop(p.x, p.y, p.zone));
+    });
+  }, 600);
+}
+
+function respawnDead() {
+  /* replace dead drops to keep dripping forever */
+  const heroRect = hero.getBoundingClientRect();
+  drops = drops.filter(d => d.phase !== 'dead');
+  const needed = 32 - drops.length;
+  if (needed <= 0) return;
+  const hacked = document.getElementById('hacked-line');
+  const anis   = document.getElementById('anis-line');
+  for (let i = 0; i < needed; i++) {
+    const useAnis  = Math.random() > 0.4;
+    const el       = useAnis ? anis : hacked;
+    const zone     = useAnis ? 'anis' : 'top';
+    const r        = el.getBoundingClientRect();
+    const left     = r.left - heroRect.left;
+    const right    = r.right - heroRect.left;
+    const x        = left + (right - left) * (0.04 + Math.random() * 0.92);
+    const y        = r.bottom - heroRect.top;
+    drops.push(new BloodDrop(x, y, zone));
+  }
+}
+
+/* ── main loop ── */
+let frame = 0;
+function loop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drops.forEach(d => { d.tick(); d.draw(); });
+  frame++;
+  if (frame % 45 === 0) respawnDead();
+  requestAnimationFrame(loop);
+}
+
+initDrops();
+loop();
+
+/* ── Cursor ── */
+const curEl  = document.getElementById('custom-cursor');
+const ringEl = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx=e.clientX; my=e.clientY;
+  curEl.style.left=(mx-6)+'px'; curEl.style.top=(my-6)+'px';
+});
+(function animRing(){
+  rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12;
+  ringEl.style.left=(rx-18)+'px'; ringEl.style.top=(ry-18)+'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('a').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{curEl.style.transform='scale(2)';ringEl.style.transform='scale(0.5)';});
+  el.addEventListener('mouseleave',()=>{curEl.style.transform='scale(1)';ringEl.style.transform='scale(1)';});
+});
+
+/* ── Audio ── */
+const audio = document.getElementById('audio-player');
+const pFill = document.getElementById('progress-fill');
+const cT    = document.getElementById('cur-time');
+const dT    = document.getElementById('dur-time');
+audio.volume = 0.8;
+
+function fmt(s){
+  if(isNaN(s)||!isFinite(s)) return '--:--';
+  const m=Math.floor(s/60), sec=Math.floor(s%60);
+  return m+':'+(sec<10?'0':'')+sec;
+}
+
+/* start at 10 seconds once metadata loaded */
+audio.addEventListener('loadedmetadata', () => {
+  audio.currentTime = 10;
+  dT.textContent = fmt(audio.duration);
+});
+
+audio.addEventListener('timeupdate', () => {
+  if(!audio.duration) return;
+  pFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+  cT.textContent = fmt(audio.currentTime);
+  dT.textContent = fmt(audio.duration - audio.currentTime);
+});
+
+/* autoplay immediately — no user click needed */
+function tryPlay() {
+  audio.play().catch(() => {});
+}
+tryPlay();
+/* fallback: on first any interaction */
+['click','keydown','touchstart','mousemove'].forEach(ev =>
+  document.addEventListener(ev, tryPlay, { once: true })
+);
+/* never allow pause */
+audio.addEventListener('pause', () => {
+  setTimeout(() => audio.play().catch(() => {}), 30);
+});
+</script>
+</body>
+</html>
